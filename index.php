@@ -2,16 +2,18 @@
 
 require_once("vendor/autoload.php");
 
-$app = new \Slim\Slim();
+use \Slim\Slim;
+use \antoniocrcruz\Page;
+
+$app = new Slim();
 
 $app->config('debug', true);
 
 $app->get('/', function() {
     
-	$sql = new antoniocrcruz\DB\Sql();
-	$results = $sql->select("SELECT * FROM tb_users");
+	$page = new Page(); //chama o header
 	
-	echo json_encode($results);
+	$page->setTpl("index"); //adiciona a página do corpo, após ele limpa a memória e carrega o destruct/arquivo footer.html
 
 });
 
