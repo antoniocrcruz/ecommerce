@@ -9,6 +9,7 @@ use \antoniocrcruz\Page;
 use \antoniocrcruz\PageAdmin;
 use \antoniocrcruz\Model\User;
 use \antoniocrcruz\Model\Category;
+use \antoniocrcruz\Model\Product;
 
 $app = new Slim();
 
@@ -248,6 +249,94 @@ $app->get("/categories/:idcategory", function($idcategory) {
 		'category'=>$category->getValues(),
 		'products'=>[]//passa para o template o objeto convertido para um array
 	]);
+});
+
+$app->get("/admin/products", function() {
+
+	User::verifyLogin();
+    
+	$products = Product::listAll();
+
+	$page = new PageAdmin(); //chama o header
+	
+	$page->setTpl("products", [
+		'products'=>$products
+	]); //adiciona a página do corpo, após ele limpa a memória e carrega o destruct/arquivo footer.html, após encerrar a execução do método
+
+});
+
+$app->get("/admin/products/create", function() {
+
+	User::verifyLogin();
+    
+	$page = new PageAdmin(); //chama o header
+	
+	$page->setTpl("products-create"); //adiciona a página do corpo, após ele limpa a memória e carrega o destruct/arquivo footer.html, após encerrar a execução do método
+
+});
+
+$app->post("/admin/products/create", function() {
+
+	User::verifyLogin();
+    
+	$product = new Product();
+	
+	$product->setData($_POST);
+
+	$product->save();
+
+	header("Location: /admin/products");	
+	exit;
+});
+
+$app->get("/admin/products/:idproduct", function($idproduct) {
+
+	User::verifyLogin();
+    
+	$product = new Product();
+
+	$product->get((int)$idproduct);
+
+	$page = new PageAdmin(); //chama o header
+	
+	$page->setTpl("products-update", [
+		'product'=>$product->getValues()
+	]); //adiciona a página do corpo, após ele limpa a memória e carrega o destruct/arquivo footer.html, após encerrar a execução do método
+
+});
+
+$app->post("/admin/products/:idproduct", function($idproduct) {
+
+	User::verifyLogin();
+    
+	$product = new Product();
+
+	$product->get((int)$idproduct);
+
+	$product->setData($_POST);
+
+	$product->save();	
+
+	$product->setPhoto($_FILES["file"]);//recebe o que é arquivo, a partir dessa variável global $_FILE
+
+	header("Location: /admin/products");	
+	exit;
+
+});
+
+$app->get("/admin/products/:idproduct/delete", function($idproduct) {
+
+	User::verifyLogin();
+    
+	$product = new Product();
+
+	$product->get((int)$idproduct);
+
+	$product->delete(); 
+
+	header("Location: /admin/products");	
+	exit;
+
 });
 
 $app->run();
